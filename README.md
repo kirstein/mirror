@@ -21,10 +21,27 @@ mirror.to(container);
 mirror.from(container);
 ```
 
+MVN Dependency
+===============================================================================
+	
+	<dependency>
+		<groupId>org.kolmas</groupId>
+		<artifactId>mirror</artifactId>
+		<version>1.0.0-beta-1-SNAPSHOT</version>
+	</dependency>
+	
+MVN Repository
+===============================================================================
+
+	<repository>
+	    <id>org.kolmas maven repository snapshots</id>
+		<url>https://github.com/kirstein/maven-repo/tree/master/snapshots</url>
+	</repository>
+
 How it works
 ===============================================================================
 
-Mirror has two main functions _to(container) and _from(container). 
+Mirror has two main functions __to(container) and __from(container). 
 To function means that mirror will try to copy each field marked with Contain annotation
 to container.
 
@@ -43,5 +60,3 @@ Demo
 ===============================================================================
 
 https://github.com/kirstein/demo-mirror 
-
-Demo that uses tapestry5.3, hibernate + HSQLDB, spring
