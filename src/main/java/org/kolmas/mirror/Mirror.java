@@ -34,6 +34,11 @@ public interface Mirror {
      */
     void prepare();
     
+    /**
+     * Set target class
+     * 
+     * @param target - target class from which to gather information.
+     */
     void setTarget(Object target);
 
 }

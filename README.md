@@ -21,32 +21,41 @@ mirror.to(container);
 mirror.from(container);
 ```
 
-MVN Dependency
+How it works
 ===============================================================================
+
+Mirror has two main functions:
+
+	mirror.to(container) - copies all fields marked with @Contain annotation to
+	predefined container. 
 	
+	mirror.from(container) - tries to copy all the data from container to given 
+	fields in targeted class.
+	
+For gathering information about fields Mirror is using Java reflections API.
+Every field that is marked with Contains annotation in target class must have its 
+getter and setter methods (methods can be made at runtime).
+
+Fields data will be gathered after Mirrors target is set. 
+
+
+Maven
+===============================================================================
+
+Dependencey:
+
 	<dependency>
 		<groupId>org.kolmas</groupId>
 		<artifactId>mirror</artifactId>
 		<version>1.0.0-beta-1-SNAPSHOT</version>
 	</dependency>
 	
-MVN Repository
-===============================================================================
+Repository:
 
 	<repository>
 	    <id>org.kolmas maven repository snapshots</id>
 		<url>https://github.com/kirstein/maven-repo/tree/master/snapshots</url>
 	</repository>
-
-How it works
-===============================================================================
-
-Mirror has two main functions __to(container) and __from(container). 
-To function means that mirror will try to copy each field marked with Contain annotation
-to container.
-
-From functions mean that mirror will try to get that field from container and store it in 
-given target class.
 
 
 Install
