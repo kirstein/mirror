@@ -8,8 +8,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Contain {
-
-	public String name() default "";
-	public String storageMethod() default "";
-	public String receiveMethod() default "";
+	String name() default "";
 }

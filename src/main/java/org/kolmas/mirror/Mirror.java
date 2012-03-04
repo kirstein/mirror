@@ -13,27 +13,27 @@ public interface Mirror {
      *            - container to copy things to.
      * @return filled container.
      */
-    public Container to(Container container);
+    Container to(Container container);
 
     /**
      * Fill given class from container.
      * 
      * @param container
      */
-    public void from(Container container);
+    void from(Container container);
 
     /**
      * Checks to see if target class is ready for data transfer or not.
      * 
      * @return
      */
-    public boolean isPrepared();
+    boolean isPrepared();
 
     /**
      * Prepares target class for data transfer.
      */
-    public void prepare();
+    void prepare();
     
-    public void setTarget(Object target);
+    void setTarget(Object target);
 
 }
