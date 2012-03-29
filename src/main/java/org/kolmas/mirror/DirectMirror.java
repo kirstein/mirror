@@ -10,6 +10,8 @@ import java.util.List;
 
 import org.kolmas.mirror.annotation.Contain;
 import org.kolmas.mirror.container.Container;
+import org.kolmas.mirror.exception.MirrorGetterException;
+import org.kolmas.mirror.exception.MirrorSetterException;
 
 /**
  * Mirror gathers all fields on target class that are annotated by Container
@@ -33,8 +35,7 @@ public class DirectMirror implements Mirror {
         setTarget(target);
     }
 
-    public DirectMirror() {
-    }
+    public DirectMirror() {}
 
     /*
      * (non-Javadoc)
@@ -46,10 +47,9 @@ public class DirectMirror implements Mirror {
         annotatedFields = null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
+    /* (non-Javadoc)
      * @see org.kolmas.mirror.Mirror#to(org.kolmas.mirror.container.Container)
+     * 
      */
     public Container to(Container container) {
         try {
@@ -64,8 +64,7 @@ public class DirectMirror implements Mirror {
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         } catch (IntrospectionException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new MirrorGetterException(e);
         }
         return container;
     }
@@ -112,7 +111,7 @@ public class DirectMirror implements Mirror {
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         } catch (IntrospectionException e) {
-            e.printStackTrace();
+            throw new MirrorSetterException(e);
         }
     }
     
