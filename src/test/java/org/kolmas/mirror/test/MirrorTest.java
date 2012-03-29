@@ -69,7 +69,7 @@ public class MirrorTest {
     public void to() {
         Exception caught = null;
         try {
-            Container container = mirror.to(testContainer);
+            Container container = mirror.store(testContainer);
             assertEquals(container, testContainer);
         } catch (MirrorGetterException e) {
             caught = e;
@@ -84,7 +84,8 @@ public class MirrorTest {
     public void from() {
         Exception caught = null;
         try {
-            mirror.from(testContainer);
+            mirror.fetch(testContainer);
+            mirror.fetch();
         } catch (MirrorSetterException e) {
             caught = e;
         } catch (Exception e) {

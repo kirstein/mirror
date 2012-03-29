@@ -12,14 +12,19 @@ public interface Mirror {
      *            - container to copy things to.
      * @return filled container.
      */
-    Container to(Container container);
+    Container store(Container container);
 
     /**
      * Fill given class from container.
      * 
      * @param container
      */
-    void from(Container container);
+    void fetch(Container container);
+    
+    /**
+     * Fetches data from last used Container.
+     */
+    void fetch();
 
     /**
      * Checks to see if target class is ready for data transfer or not.

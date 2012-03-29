@@ -56,7 +56,7 @@ public class DirectMirror implements Mirror {
      * 
      * @see org.kolmas.mirror.Mirror#to(org.kolmas.mirror.container.Container)
      */
-    public Container to(Container container) {
+    public Container store(Container container) {
         try {
             forcePrepare();
             this.container = container;
@@ -83,7 +83,8 @@ public class DirectMirror implements Mirror {
             if (!annotation.storeCollection()) {
                 container.store(storageName, type, result);
             } else {
-                Method method = getContainerMethod(annotation.setCollection(), String.class, Class.class, Collection.class);
+                Method method = getContainerMethod(annotation.setCollection(), String.class, Class.class,
+                        Collection.class);
                 method.invoke(container, storageName, type, result);
             }
         } catch (IllegalArgumentException e) {
@@ -127,7 +128,7 @@ public class DirectMirror implements Mirror {
      * 
      * @see org.kolmas.mirror.Mirror#from(org.kolmas.mirror.container.Container)
      */
-    public void from(Container container) {
+    public void fetch(Container container) {
         try {
             forcePrepare();
             this.container = container;
@@ -218,5 +219,9 @@ public class DirectMirror implements Mirror {
                 annotatedFields.add(field);
             }
         }
+    }
+
+    public void fetch() {
+        fetch(container);
     }
 }
