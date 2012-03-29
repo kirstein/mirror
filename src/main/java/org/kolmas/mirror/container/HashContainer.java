@@ -8,7 +8,7 @@ public class HashContainer implements Container {
 
     private Map<String, Object> map = new HashMap<String, Object>();
     
-    public void store(String fieldName, Object result) {
+    public void store(String fieldName, Class<?> type, Object result) {
         map.put(fieldName, result);
     }
 

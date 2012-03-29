@@ -3,7 +3,6 @@ package org.kolmas.mirror;
 import org.kolmas.mirror.container.Container;
 
 public interface Mirror {
-
     /**
      * Copy initiated class data to given container. All class fields that are
      * annotated with predefined annotation (annotation: Contain.class) will be

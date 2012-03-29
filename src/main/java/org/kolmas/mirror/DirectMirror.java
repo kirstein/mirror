@@ -6,10 +6,14 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.kolmas.mirror.annotation.Contain;
 import org.kolmas.mirror.container.Container;
+import org.kolmas.mirror.exception.MirrorCantFindMethodException;
+import org.kolmas.mirror.exception.MirrorCantStoreExeception;
 import org.kolmas.mirror.exception.MirrorGetterException;
 import org.kolmas.mirror.exception.MirrorSetterException;
 
@@ -27,6 +31,8 @@ public class DirectMirror implements Mirror {
 
     private Object target;
     private List<Field> annotatedFields;
+    private Contain annotation;
+    private Container container;
 
     /**
      * @param target
@@ -34,8 +40,6 @@ public class DirectMirror implements Mirror {
     public DirectMirror(Object target) {
         setTarget(target);
     }
-
-    public DirectMirror() {}
 
     /*
      * (non-Javadoc)
@@ -47,19 +51,22 @@ public class DirectMirror implements Mirror {
         annotatedFields = null;
     }
 
-    /* (non-Javadoc)
-     * @see org.kolmas.mirror.Mirror#to(org.kolmas.mirror.container.Container)
+    /*
+     * (non-Javadoc)
      * 
+     * @see org.kolmas.mirror.Mirror#to(org.kolmas.mirror.container.Container)
      */
     public Container to(Container container) {
         try {
             forcePrepare();
+            this.container = container;
             for (Field field : annotatedFields) {
-                Contain usedAnnotation = field.getAnnotation(Contain.class);
+                annotation = field.getAnnotation(Contain.class);
+
                 Method getMethod = getGetMethod(field);
-                Object result = getObjectFromTarget(getMethod, usedAnnotation);
-                String storageName = getStorageName(field.getName(), usedAnnotation);
-                container.store(storageName, result);
+                Object result = getObjectFromTarget(getMethod, annotation);
+                String storageName = getStorageName(field.getName(), annotation);
+                store(field, storageName, result);
             }
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
@@ -67,6 +74,33 @@ public class DirectMirror implements Mirror {
             throw new MirrorGetterException(e);
         }
         return container;
+    }
+
+    private void store(Field field, String storageName, Object result) {
+
+        try {
+            Class<?> type = field.getType();
+            if (!annotation.storeCollection()) {
+                container.store(storageName, type, result);
+            } else {
+                Method method = getContainerMethod(annotation.setCollection(), String.class, Class.class, Collection.class);
+                method.invoke(container, storageName, type, result);
+            }
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Method getContainerMethod(String methodName, Class<?>... params) {
+        try {
+            return container.getClass().getDeclaredMethod(methodName, params);
+        } catch (Exception e) {
+            throw new MirrorCantFindMethodException(e);
+        }
     }
 
     private String getStorageName(String fieldName, Contain usedAnnotation) {
@@ -96,16 +130,43 @@ public class DirectMirror implements Mirror {
     public void from(Container container) {
         try {
             forcePrepare();
+            this.container = container;
             for (Field field : annotatedFields) {
-                Contain usedAnnotation = field.getAnnotation(Contain.class);
-                Method setMethod = getSetMethod(field);
-                String storageName = getStorageName(field.getName(), usedAnnotation);
-                Object result = container.retrieve(storageName);
-                
-                setMethod.invoke(target, result);
+                annotation = field.getAnnotation(Contain.class);
+                String storageName = getStorageName(field.getName(), annotation);
+                Object result = retrieve(field, storageName);
+                set(field, result);
             }
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
+        }
+    }
+
+    private Object retrieve(Field field, String storageName) {
+        Object ret = null;
+        try {
+            if (!annotation.storeCollection()) {
+                return container.retrieve(storageName);
+            } else {
+                Method method = getContainerMethod(annotation.getCollection(), String.class);
+                ret = method.invoke(container, storageName);
+            }
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return ret;
+    }
+
+    private void set(Field field, Object result) {
+        try {
+            Method setMethod = getSetMethod(field);
+            if (result != null || (result == null && annotation.nullable())) {
+                setMethod.invoke(target, result);
+            }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -114,12 +175,12 @@ public class DirectMirror implements Mirror {
             throw new MirrorSetterException(e);
         }
     }
-    
+
     private Method getSetMethod(Field field) throws IntrospectionException {
         Method setMethod = new PropertyDescriptor(field.getName(), target.getClass()).getWriteMethod();
         return setMethod;
     }
-    
+
     private Method getGetMethod(Field field) throws IntrospectionException {
         Method getMethod = new PropertyDescriptor(field.getName(), target.getClass()).getReadMethod();
         return getMethod;
