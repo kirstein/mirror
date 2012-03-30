@@ -65,6 +65,7 @@ public class DirectMirror implements Mirror {
         this.container = container;
         getContainerAnnotations();
     }
+
     /*
      * (non-Javadoc)
      * 
@@ -82,9 +83,9 @@ public class DirectMirror implements Mirror {
                 String storageName = getStorageName(field.getName(), fieldAnnotation);
                 store(field, storageName, result);
             }
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             throw e;
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new MirrorGetterException(e);
         }
         return container;
@@ -100,7 +101,8 @@ public class DirectMirror implements Mirror {
             try {
                 method.invoke(container, storageName, type, result);
             } catch (Exception e) {
-                throw new MirrorCantFindMethodException(MirrorCantFindMethodException.STORE_METHOD_NOT_ACCEPTABLE, storeMethodName, e);
+                throw new MirrorCantFindMethodException(MirrorCantFindMethodException.STORE_METHOD_NOT_ACCEPTABLE,
+                        storeMethodName, e);
             }
         }
     }
@@ -116,7 +118,7 @@ public class DirectMirror implements Mirror {
         }
         throw new MirrorCantFindMethodException(methodName);
     }
-    
+
     private String getStorageName(String fieldName, Contain usedAnnotation) {
         String annotatedStorageName = usedAnnotation.name();
         return (annotatedStorageName.isEmpty() ? fieldName : annotatedStorageName);
@@ -155,9 +157,10 @@ public class DirectMirror implements Mirror {
         } else {
             Method method = getMethodWithAnnotation(retrieveMethodName, false);
             try {
-               return method.invoke(container, storageName);
+                return method.invoke(container, storageName);
             } catch (Exception e) {
-                throw new MirrorCantFindMethodException(MirrorCantFindMethodException.RETRIEVE_METHOD_NOT_ACCEPTABLE, retrieveMethodName, e);
+                throw new MirrorCantFindMethodException(MirrorCantFindMethodException.RETRIEVE_METHOD_NOT_ACCEPTABLE,
+                        retrieveMethodName, e);
             }
         }
     }
@@ -224,7 +227,7 @@ public class DirectMirror implements Mirror {
         if (container == null) {
             throw new MirrorContainerNullException();
         }
-        
+
         getTargetAnnotations();
         getContainerAnnotations();
     }
@@ -248,7 +251,10 @@ public class DirectMirror implements Mirror {
         Method[] methods = container.getClass().getDeclaredMethods();
         for (Method method : methods) {
             if (method.isAnnotationPresent(ContainMethod.class)) {
-                annotatedMethods.add(method);
+                ContainMethod annotation = method.getAnnotation(ContainMethod.class);
+                if (!annotation.store().equals(Mirror.NOT_DEFINED) || !annotation.retrieve().equals(Mirror.NOT_DEFINED)) {
+                    annotatedMethods.add(method);
+                }
             }
         }
     }

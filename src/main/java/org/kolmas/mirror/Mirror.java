@@ -48,5 +48,10 @@ public interface Mirror {
      */
     void setTarget(Object target);
 
+    /**
+     * Set target container
+     * 
+     * @param container
+     */
     void setContainer(Container container);
 }

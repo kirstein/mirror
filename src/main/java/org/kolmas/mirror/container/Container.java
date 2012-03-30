@@ -1,10 +1,6 @@
 package org.kolmas.mirror.container;
 
 public interface Container {
-
-    String COLLECTION_SET_METHOD = "storeCollection";
-    String COLLECTION_GET_METHOD = "retrieveCollection";
-
     /**
      * Data store method.
      * 
