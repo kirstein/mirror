@@ -15,10 +15,10 @@ Container container = new Container();
 Mirror mirror = new DirectMirror(this);
 
 // Mirror from class to container
-mirror.to(container);
+mirror.store(container);
 
 // Mirror from container to class
-mirror.from(container);
+mirror.fetch(container);
 ```
 
 How it works
