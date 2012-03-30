@@ -39,30 +39,11 @@ getter and setter methods (methods can be made at runtime).
 Fields data will be gathered after Mirrors target is set. 
 
 
-Maven
-===============================================================================
-
-Dependencey:
-
-	<dependency>
-		<groupId>org.kolmas</groupId>
-		<artifactId>mirror</artifactId>
-		<version>1.0.0-beta-1-SNAPSHOT</version>
-	</dependency>
-	
-Repository:
-
-	<repository>
-	    <id>org.kolmas maven repository snapshots</id>
-		<url>https://github.com/kirstein/maven-repo/tree/master/snapshots</url>
-	</repository>
-
-
 Install
 ===============================================================================
 
-After getting the repository from github install mirror using Maven.
-
+    git clone git@github.com:kirstein/mirror.git
+    cd mirror
 	mvn clean install
 
 Demo
