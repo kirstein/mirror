@@ -3,6 +3,8 @@ package org.kolmas.mirror;
 import org.kolmas.mirror.container.Container;
 
 public interface Mirror {
+
+    public static final String NOT_DEFINED = "";
     /**
      * Copy initiated class data to given container. All class fields that are
      * annotated with predefined annotation (annotation: Contain.class) will be
@@ -13,6 +15,7 @@ public interface Mirror {
      * @return filled container.
      */
     Container store(Container container);
+    
 
     /**
      * Fill given class from container.
@@ -45,4 +48,5 @@ public interface Mirror {
      */
     void setTarget(Object target);
 
+    void setContainer(Container container);
 }

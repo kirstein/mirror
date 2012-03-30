@@ -3,19 +3,18 @@ package org.kolmas.mirror;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.kolmas.mirror.annotation.Contain;
+import org.kolmas.mirror.annotation.ContainMethod;
 import org.kolmas.mirror.container.Container;
 import org.kolmas.mirror.exception.MirrorCantFindMethodException;
-import org.kolmas.mirror.exception.MirrorCantStoreExeception;
+import org.kolmas.mirror.exception.MirrorContainerNullException;
 import org.kolmas.mirror.exception.MirrorGetterException;
 import org.kolmas.mirror.exception.MirrorSetterException;
+import org.kolmas.mirror.exception.MirrorTargetNullException;
 
 /**
  * Mirror gathers all fields on target class that are annotated by Container
@@ -30,9 +29,13 @@ import org.kolmas.mirror.exception.MirrorSetterException;
 public class DirectMirror implements Mirror {
 
     private Object target;
-    private List<Field> annotatedFields;
-    private Contain annotation;
     private Container container;
+    private List<Field> annotatedFields;
+    private List<Method> annotatedMethods;
+    private Contain fieldAnnotation;
+
+    public DirectMirror() {
+    }
 
     /**
      * @param target
@@ -47,63 +50,73 @@ public class DirectMirror implements Mirror {
      * @see org.kolmas.mirror.Mirror#setTarget(java.lang.Object)
      */
     public void setTarget(Object target) {
+        if (target == null) {
+            throw new MirrorTargetNullException();
+        }
         this.target = target;
         annotatedFields = null;
+        annotatedMethods = null;
     }
 
+    public void setContainer(Container container) {
+        if (container == null) {
+            throw new MirrorContainerNullException();
+        }
+        this.container = container;
+        getContainerAnnotations();
+    }
     /*
      * (non-Javadoc)
      * 
      * @see org.kolmas.mirror.Mirror#to(org.kolmas.mirror.container.Container)
      */
     public Container store(Container container) {
+        validateAndSetContainer(container);
         try {
             forcePrepare();
-            this.container = container;
             for (Field field : annotatedFields) {
-                annotation = field.getAnnotation(Contain.class);
+                fieldAnnotation = field.getAnnotation(Contain.class);
 
                 Method getMethod = getGetMethod(field);
-                Object result = getObjectFromTarget(getMethod, annotation);
-                String storageName = getStorageName(field.getName(), annotation);
+                Object result = getObjectFromTarget(getMethod, fieldAnnotation);
+                String storageName = getStorageName(field.getName(), fieldAnnotation);
                 store(field, storageName, result);
             }
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IntrospectionException e) {
+        } catch(RuntimeException e) {
+            throw e;
+        }catch (Exception e) {
             throw new MirrorGetterException(e);
         }
         return container;
     }
 
     private void store(Field field, String storageName, Object result) {
-
-        try {
-            Class<?> type = field.getType();
-            if (!annotation.storeCollection()) {
-                container.store(storageName, type, result);
-            } else {
-                Method method = getContainerMethod(annotation.setCollection(), String.class, Class.class,
-                        Collection.class);
+        Class<?> type = field.getType();
+        String storeMethodName = fieldAnnotation.method();
+        if (storeMethodName.equals(Mirror.NOT_DEFINED)) {
+            container.store(storageName, type, result);
+        } else {
+            Method method = getMethodWithAnnotation(storeMethodName, true);
+            try {
                 method.invoke(container, storageName, type, result);
+            } catch (Exception e) {
+                throw new MirrorCantFindMethodException(MirrorCantFindMethodException.STORE_METHOD_NOT_ACCEPTABLE, storeMethodName, e);
             }
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
         }
     }
 
-    private Method getContainerMethod(String methodName, Class<?>... params) {
-        try {
-            return container.getClass().getDeclaredMethod(methodName, params);
-        } catch (Exception e) {
-            throw new MirrorCantFindMethodException(e);
+    private Method getMethodWithAnnotation(String methodName, Boolean storage) {
+        for (Method method : annotatedMethods) {
+            ContainMethod ann = method.getAnnotation(ContainMethod.class);
+            if (storage && ann.store().equals(methodName)) {
+                return method;
+            } else if (!storage && ann.retrieve().equals(methodName)) {
+                return method;
+            }
         }
+        throw new MirrorCantFindMethodException(methodName);
     }
-
+    
     private String getStorageName(String fieldName, Contain usedAnnotation) {
         String annotatedStorageName = usedAnnotation.name();
         return (annotatedStorageName.isEmpty() ? fieldName : annotatedStorageName);
@@ -113,12 +126,8 @@ public class DirectMirror implements Mirror {
         Object result = null;
         try {
             result = getMethod.invoke(target);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new MirrorGetterException(e);
         }
         return result;
     }
@@ -129,50 +138,37 @@ public class DirectMirror implements Mirror {
      * @see org.kolmas.mirror.Mirror#from(org.kolmas.mirror.container.Container)
      */
     public void fetch(Container container) {
-        try {
-            forcePrepare();
-            this.container = container;
-            for (Field field : annotatedFields) {
-                annotation = field.getAnnotation(Contain.class);
-                String storageName = getStorageName(field.getName(), annotation);
-                Object result = retrieve(field, storageName);
-                set(field, result);
-            }
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+        validateAndSetContainer(container);
+        forcePrepare();
+        for (Field field : annotatedFields) {
+            fieldAnnotation = field.getAnnotation(Contain.class);
+            String storageName = getStorageName(field.getName(), fieldAnnotation);
+            Object result = retrieve(field, storageName);
+            setFieldData(field, result);
         }
     }
 
     private Object retrieve(Field field, String storageName) {
-        Object ret = null;
-        try {
-            if (!annotation.storeCollection()) {
-                return container.retrieve(storageName);
-            } else {
-                Method method = getContainerMethod(annotation.getCollection(), String.class);
-                ret = method.invoke(container, storageName);
+        String retrieveMethodName = fieldAnnotation.method();
+        if (retrieveMethodName.equals(Mirror.NOT_DEFINED)) {
+            return container.retrieve(storageName);
+        } else {
+            Method method = getMethodWithAnnotation(retrieveMethodName, false);
+            try {
+               return method.invoke(container, storageName);
+            } catch (Exception e) {
+                throw new MirrorCantFindMethodException(MirrorCantFindMethodException.RETRIEVE_METHOD_NOT_ACCEPTABLE, retrieveMethodName, e);
             }
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
         }
-        return ret;
     }
 
-    private void set(Field field, Object result) {
+    private void setFieldData(Field field, Object result) {
         try {
             Method setMethod = getSetMethod(field);
-            if (result != null || (result == null && annotation.nullable())) {
+            if (result != null || (result == null && fieldAnnotation.nullable())) {
                 setMethod.invoke(target, result);
             }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IntrospectionException e) {
+        } catch (Exception e) {
             throw new MirrorSetterException(e);
         }
     }
@@ -187,12 +183,22 @@ public class DirectMirror implements Mirror {
         return getMethod;
     }
 
+    private void validateAndSetContainer(Container container) {
+        if (container == null) {
+            throw new MirrorContainerNullException();
+        }
+        if (target == null) {
+            throw new MirrorTargetNullException();
+        }
+        this.container = container;
+    }
+
     /**
      * If Mirror has not gathered information about fields, then initiate
      * prepare method.
      */
     private void forcePrepare() {
-        if (!isPrepared()) {
+        if (!isPrepared() && target != null) {
             prepare();
         }
     }
@@ -212,6 +218,22 @@ public class DirectMirror implements Mirror {
      * @see org.kolmas.mirror.Mirror#prepare()
      */
     public void prepare() {
+        if (target == null) {
+            throw new MirrorTargetNullException();
+        }
+        if (container == null) {
+            throw new MirrorContainerNullException();
+        }
+        
+        getTargetAnnotations();
+        getContainerAnnotations();
+    }
+
+    public void fetch() {
+        fetch(container);
+    }
+
+    private void getTargetAnnotations() {
         annotatedFields = new ArrayList<Field>();
         Field[] fields = target.getClass().getDeclaredFields();
         for (Field field : fields) {
@@ -221,7 +243,13 @@ public class DirectMirror implements Mirror {
         }
     }
 
-    public void fetch() {
-        fetch(container);
+    private void getContainerAnnotations() {
+        annotatedMethods = new ArrayList<Method>();
+        Method[] methods = container.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(ContainMethod.class)) {
+                annotatedMethods.add(method);
+            }
+        }
     }
 }

@@ -26,10 +26,10 @@ How it works
 
 Mirror has two main functions:
 
-	mirror.to(container) - copies all fields marked with @Contain annotation to
+	mirror.store(container) - copies all fields marked with @Contain annotation to
 	predefined container. 
 	
-	mirror.from(container) - tries to copy all the data from container to given 
+	mirror.fetch(container) - tries to copy all the data from container to given 
 	fields in targeted class.
 	
 For gathering information about fields Mirror is using Java reflections API.
