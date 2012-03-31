@@ -18,7 +18,7 @@ Mirror mirror = new DirectMirror(this);
 mirror.store(container);
 
 // Mirror from container to class
-mirror.fetch(container);
+mirror.retrieve(container);
 ```
 
 How it works

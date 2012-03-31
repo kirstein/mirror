@@ -1,15 +1,20 @@
 package org.kolmas.mirror.container;
 
+/**
+ * 
+ * @author Mikk Kirstein
+ * 
+ */
 public interface Container {
     /**
      * Data store method.
      * 
      * @param fieldName
-     *            - name from where data came from.
+     *            name from where data came from.
      * @param type
-     *            - type of data
+     *            type of data
      * @param result
-     *            - result
+     *            result
      */
     void store(String fieldName, Class<?> type, Object result);
 
@@ -17,7 +22,7 @@ public interface Container {
      * Asks for data.
      * 
      * @param fieldName
-     *            - Field name
+     *            Field name
      * @return Object result.
      */
     Object retrieve(String fieldName);

@@ -7,6 +7,10 @@ import java.lang.annotation.Target;
 
 import org.kolmas.mirror.Mirror;
 
+/**
+ * @author Mikk Kirstein
+ *
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface ContainMethod {

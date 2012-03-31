@@ -51,14 +51,14 @@ public class NormalTest {
         
         // Retrieve value
         when(mock.retrieve("string")).thenReturn("changedvalue");
-        mirror.fetch(mock);
+        mirror.retrieve(mock);
         
         // Check that values have been overridden
         assertEquals(test.getString(), "changedvalue");
         
         // Test last container
         test.setString("random");
-        mirror.fetch();
+        mirror.retrieve();
         assertEquals(test.getString(), "changedvalue");
     }    
     
@@ -74,7 +74,7 @@ public class NormalTest {
                 
         // Test nullable
         when(mock.retrieve("test")).thenReturn(null);
-        mirror.fetch(mock);
+        mirror.retrieve(mock);
         assertEquals(test.getNullable(), "Value");
     }
     
@@ -94,7 +94,7 @@ public class NormalTest {
         assertEquals(target.getStr(), "asd");
         
         // Fetching from different method
-        mirror.fetch(mock);
+        mirror.retrieve(mock);
         assertEquals(target.getStr(), "new data");
     }
  
@@ -103,5 +103,11 @@ public class NormalTest {
         TestNullable test = new TestNullable();
         mirror = new DirectMirror(test);
         mirror.setContainer(mock);
+    }
+    
+    @Test
+    public void changeContainer() {
+        mirror.setContainer(mock);
+        mirror.setContainer(new CustomMethodCont());
     }
 }
