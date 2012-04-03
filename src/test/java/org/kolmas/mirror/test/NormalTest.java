@@ -12,9 +12,9 @@ import org.kolmas.mirror.DirectMirror;
 import org.kolmas.mirror.Mirror;
 import org.kolmas.mirror.container.Container;
 import org.kolmas.mirror.mock.container.CustomMethodCont;
-import org.kolmas.mirror.mock.target.TestDifferentMethods;
-import org.kolmas.mirror.mock.target.TestNormal;
-import org.kolmas.mirror.mock.target.TestNullable;
+import org.kolmas.mirror.mock.targetobj.TestDifferentMethods;
+import org.kolmas.mirror.mock.targetobj.TestNormal;
+import org.kolmas.mirror.mock.targetobj.TestNullable;
 
 public class NormalTest {
 

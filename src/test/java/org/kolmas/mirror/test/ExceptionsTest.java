@@ -11,8 +11,8 @@ import org.kolmas.mirror.exception.MirrorCantFindMethodException;
 import org.kolmas.mirror.exception.MirrorGetterException;
 import org.kolmas.mirror.exception.MirrorSetterException;
 import org.kolmas.mirror.mock.container.CustomMethodCont;
-import org.kolmas.mirror.mock.target.NoGettersAndSetters;
-import org.kolmas.mirror.mock.target.TestDifferentMethodsExcep;
+import org.kolmas.mirror.mock.targetobj.NoGettersAndSetters;
+import org.kolmas.mirror.mock.targetobj.TestDifferentMethodsExcep;
 
 public class ExceptionsTest {
 
