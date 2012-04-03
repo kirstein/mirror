@@ -1,11 +1,9 @@
-package org.kolmas.mirror.test;
+package org.kolmas.mirror;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.Test;
-import org.kolmas.mirror.DirectMirror;
-import org.kolmas.mirror.Mirror;
 import org.kolmas.mirror.container.Container;
 import org.kolmas.mirror.exception.MirrorCantFindMethodException;
 import org.kolmas.mirror.exception.MirrorGetterException;

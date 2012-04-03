@@ -1,4 +1,4 @@
-package org.kolmas.mirror.test;
+package org.kolmas.mirror;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -8,8 +8,6 @@ import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.kolmas.mirror.DirectMirror;
-import org.kolmas.mirror.Mirror;
 import org.kolmas.mirror.container.Container;
 import org.kolmas.mirror.mock.container.CustomMethodCont;
 import org.kolmas.mirror.mock.targetobj.TestDifferentMethods;
